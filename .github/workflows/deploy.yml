@@ -3,27 +3,27 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-
+    
 jobs:
   build-test:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:13
+        image: postgres:12.2-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
           POSTGRES_DB: testdb
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres"
+          --health-cmd="pg_isready -U testuser"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,10 +31,18 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install poetry
+          poetry install
 
-      - name: Run tests
-        run: pytest
+      - name: Prepare logs folder
+        run: sudo mkdir -p /var/logs && sudo chmod 777 /var/logs
+
+      - name: Run unit tests
+        env:
+          DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb
+        run: poetry run pytest -m "not integration"
+
 
   deploy:
     needs: build-test
