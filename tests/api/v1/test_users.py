@@ -4,6 +4,10 @@ import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
 
+environ["APP_ENV"] = "test"
+
+pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
+
 # from fastapi.testclient import TestClient
 from starlette.status import (
     HTTP_200_OK,
