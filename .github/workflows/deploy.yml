@@ -34,7 +34,9 @@ jobs:
         run: |
          pip install poetry
          poetry install
-         
+      - name: Prepare logs folder
+        run: sudo mkdir -p /var/logs && sudo chmod 777 /var/logs
+
       - name: Run tests
         run: poetry run pytest
 
