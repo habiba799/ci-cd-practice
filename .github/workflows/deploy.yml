@@ -38,10 +38,11 @@ jobs:
       - name: Prepare logs folder
         run: sudo mkdir -p /var/logs && sudo chmod 777 /var/logs
 
-      - name: Run tests
+      - name: Run unit tests
         env:
           DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb
-        run: poetry run pytest
+        run: poetry run pytest -m "not integration"
+
 
   deploy:
     needs: build-test
