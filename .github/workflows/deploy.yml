@@ -48,15 +48,18 @@ jobs:
       - name: Check PostgreSQL
         run: |
           pg_isready -h localhost -p 5432 -U testuser -d testdb
-
-      - name: Run Alembic migrations
         env:
-          DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+          PGPASSWORD: testpass
+
+      - name: Run database migrations
+        env:
+          APP_ENV: test
         run: |
           poetry run alembic upgrade head
 
       - name: Run unit tests
         env:
+          APP_ENV: test
           DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
         run: |
           poetry run pytest -m "not integration"
@@ -68,7 +71,7 @@ jobs:
 
     steps:
       - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
