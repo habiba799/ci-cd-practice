@@ -39,6 +39,10 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install
+      - name: Prepare logs folder
+        run: |
+          sudo mkdir -p /var/logs
+          sudo chmod 777 /var/logs
 
       - name: Check PostgreSQL
         run: |
