@@ -40,11 +40,6 @@ jobs:
         run: |
           poetry install
 
-      - name: Prepare logs folder
-        run: |
-          sudo mkdir -p /var/logs
-          sudo chmod 777 /var/logs
-
       - name: Check PostgreSQL
         run: |
           pg_isready -h localhost -p 5432 -U testuser -d testdb
