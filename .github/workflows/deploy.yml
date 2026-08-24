@@ -18,31 +18,50 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U testuser"
+          --health-cmd="pg_isready -U testuser -d testdb"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
           pip install poetry
+
+      - name: Install dependencies
+        run: |
           poetry install
 
       - name: Prepare logs folder
-        run: sudo mkdir -p /var/logs && sudo chmod 777 /var/logs
+        run: |
+          sudo mkdir -p /var/logs
+          sudo chmod 777 /var/logs
+
+      - name: Check PostgreSQL
+        env:
+          PGPASSWORD: testpass
+        run: |
+          psql -h localhost -U testuser -d testdb -c "\l"
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
+        run: |
+          poetry run alembic upgrade head
 
       - name: Run unit tests
         env:
           DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
-        run: poetry run pytest -m "not integration"
+        run: |
+          poetry run pytest -m "not integration" -vv
 
   deploy:
     needs: build-test
