@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-test:
@@ -24,13 +24,13 @@ jobs:
           --health-retries=5
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install Poetry
         run: |
@@ -46,12 +46,10 @@ jobs:
           sudo chmod 777 /var/logs
 
       - name: Check PostgreSQL
-        env:
-          PGPASSWORD: testpass
         run: |
-          psql -h localhost -U testuser -d testdb -c "\l"
+          pg_isready -h localhost -p 5432 -U testuser -d testdb
 
-      - name: Run database migrations
+      - name: Run Alembic migrations
         env:
           DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
         run: |
@@ -61,7 +59,7 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
         run: |
-          poetry run pytest -m "not integration" -vv
+          poetry run pytest -m "not integration"
 
   deploy:
     needs: build-test
