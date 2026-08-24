@@ -1,10 +1,3 @@
-import logging
-
-from pydantic import PostgresDsn, SecretStr
-
-from app.core.settings.app import AppSettings
-
-
 class TestAppSettings(AppSettings):
     # fastapi_kwargs
     debug: bool = True
@@ -12,5 +5,5 @@ class TestAppSettings(AppSettings):
 
     # back-end app settings
     secret_key: SecretStr = SecretStr("secret-test")
-    db_url: PostgresDsn = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+    db_url: PostgresDsn = "postgresql+asyncpg://testuser:testpass@localhost:5432/testdb"
     logging_level: int = logging.DEBUG
