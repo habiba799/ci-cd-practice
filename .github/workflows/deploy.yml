@@ -5,6 +5,11 @@ on:
     branches: [main]
 
 jobs:
+  
+  security:
+    name: Security Checks
+    uses: ./.github/workflows/security.yml
+
   build-test:
     runs-on: ubuntu-latest
 
